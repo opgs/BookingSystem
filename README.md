@@ -1,5 +1,5 @@
 # BookingSystem
-PHP and SQL based room booking stsrem
+PHP and SQL based room booking sytsem
 
 Dependencies :- 
 - JQuery >= 3.2.1
