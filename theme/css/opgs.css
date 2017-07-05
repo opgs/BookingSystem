@@ -1,0 +1,183 @@
+body {
+	font-family: "Segoe UI","Segoe",Tahoma,Helvetica,Arial,sans-serif;
+	margin: 0;
+	max-width: 960px;
+}
+
+a:visited {
+	color: rgb(0, 0, 238);
+}
+
+#container {
+	width: 95%;
+	max-width: 960px;
+	margin: auto;
+}
+
+#topLinks {
+	width: 100%;
+	min-height: 30px;
+	text-align: right;
+	font-size: 13px;
+}
+
+#globalNav {
+	height: 30px;
+	text-align: right;
+	border-bottom: 6px solid transparent;
+	clear: both;
+	font-size: 13px;
+	padding-bottom: 10px;
+	margin-top: -10px;
+}
+
+#globalNav #menu {
+	margin: 0;
+	height: 30px;
+}
+
+#globalNav ul {
+	display: inline-block;
+	margin: 0;
+}
+
+#globalNav ul li {
+	display: inline-block;
+	padding: 10px 5px;
+	margin-right: 30px;
+}
+
+#globalNav ul li:hover {
+	background-color: rgba(179, 214, 239, 0.9);
+}
+
+#globalNav ul li.selected {
+	background-color: #860038;
+}
+
+#globalNav ul li.selected a {
+	color: #FFf;
+}
+
+#globalNav ul li a {
+	border: 1px solid transparent;
+	text-decoration: none;
+}
+
+#datepicker {
+	font-weight: bold;
+	text-align: center;
+}
+
+.ui-datepicker {
+	font-size: 10pt !important;
+}
+
+.ui-widget-header {
+	border: 0 !important;
+	background: #ABD4F0 url("images/ui-bg_gloss-wave_35_f6a828_500x100.png") !important;
+}
+
+#nextDay img, #prevDay img, #today img {
+	vertical-align: -7px;
+	border: 0;
+}
+
+#nextDay a, #prevDay a, #today a {
+	border: 0;
+}
+
+#nextDay {
+	margin-left: -2px;
+	border: 0;
+}
+
+#today {
+	margin-left: -3px;
+	border: 0;
+}
+
+#prevDay {
+	margin-right: -2px;
+	margin-left: 2px;
+	border: 0;
+}
+
+#timetableDay {
+	margin-left: 20px;
+}
+
+#content {
+	min-height: 500px;
+	position: relative;
+}
+
+#timetable {
+	padding: 0px;
+	text-overflow: ellipsis;
+	font-size: 15px;
+}
+
+#timetable th {
+	min-height: 45px;
+	height: 45px;
+}
+
+#timetable td, #timetable th {
+	background-color: #eee;
+	text-align: center;
+}
+
+#timetable .room {
+	max-width: 77px;
+	width: 77px;
+}
+
+#timetable .room a {
+	text-decoration: none;
+}
+
+#timetable .break, #timetable .lunch, #timetable .amreg, #timetable .pmreg, #timetable .before, #timetable .after {
+	background-color: #ccc;
+}
+
+#timetable .free a {
+	text-decoration: none;
+}
+
+#timetable .period, #timetable .lunch {
+	width: 10%;
+	height: 75px;
+}
+
+#timetable .timetabled {
+	background-color: #860038;
+	color: #fff;
+}
+
+#timetable .timetabled a {
+	color: #999;
+	text-decoration: none;
+}
+
+#timetable .booked {
+	background-color: #ccffff;
+	color: #000;
+}
+
+#timetable .booked a {
+	text-decoration: none;
+}
+
+#bookingContent {
+	text-align: center;
+	width: 100%;
+}
+
+#bookingContent table {
+	margin: auto;
+}
+
+pre {
+	margin: 0;
+}

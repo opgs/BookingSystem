@@ -1,0 +1,60 @@
+.prefetch {
+	display:none;
+}
+
+.center {
+	text-align: center;
+}
+
+.msg {
+	color: #f00;
+}
+
+div.collapsable {
+	width: 100%;
+	background-color: #ABD4F0;
+	background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.02) 51%);
+	border-top-right-radius: 10px;
+	padding: 1px;
+	min-height: 25px;
+	margin-bottom: 25px;
+}
+div.collapsable > span {
+	width: 100%;
+	padding-left: 30px;
+	background-image: url("../gfx/plus.png");
+	background-size: 25px;
+	background-repeat: no-repeat;
+}
+div.collapsable.expanded > span {
+	background-image: url("../gfx/minus.png");
+}
+div.collapsable table {
+	font-size: 13px;
+}
+div.collapsable form, div.collapsable div {
+	display: none;
+	margin: 5px;
+	background-color: rgba(255,255,255,0.5);
+	width: 470px;
+	position: relative;
+	padding: 5px;
+}
+div.collapsable form label {
+	margin-right: 15px;
+	margin-bottom: 5px;
+	font-size: 13px;
+}
+
+#progressSettings, #uploadform {
+	display: block;
+	width: 90%;
+}
+#progressSettings input, #uploadform input {
+	position: relative;
+	left: 0px;
+}
+
+#yearblocks td:first-child {
+	width: 190px;
+}
