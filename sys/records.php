@@ -1,41 +1,34 @@
 <?php
 
-$classes = [];
-
 class Lesson
 {
 	private $id = 0;
 	private $classname = '';
 	private $teacher = '';
 	private $period = '';
-	private $room = 0;
-	private $noofstudents = 0;
+	private $room = '';
 	
-	function getID(){return $this->id;}
+	function getID() : int {return $this->id;}
 	
-	function setClassName($classnameIn){$this->classname = $classnameIn;}
-	function getClassName(){return $this->classname;}
+	function setClassName(string $classnameIn){$this->classname = $classnameIn;}
+	function getClassName() : string {return $this->classname;}
 	
-	function setTeacher($teacherIn){$this->teacher = $teacherIn;}
-	function getTeacher(){return $this->teacher;}
+	function setTeacher(string $teacherIn){$this->teacher = $teacherIn;}
+	function getTeacher() : string {return $this->teacher;}
 	
-	function setPeriod($periodIn){$this->period = $periodIn;}
-	function getPeriod(){return $this->period;}
+	function setPeriod(string $periodIn){$this->period = $periodIn;}
+	function getPeriod() : string {return $this->period;}
 	
-	function setRoom($roomIn){$this->room = $roomIn;}
-	function getRoom(){return $this->room;}
+	function setRoom(string $roomIn){$this->room = $roomIn;}
+	function getRoom() : string {return $this->room;}
 	
-	function setNoOfStudents($noofstudentsin){$this->noofstudents = $noofstudentsin;}
-	function getNoOfStudents(){return $this->noofstudents;}
-	
-	function __construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $noofstudentsIn)
+	function __construct(int $idIn, string $classnameIn, string $teacherIn, string $periodIn, string $roomIn)
 	{
 		$this->id = $idIn;
 		$this->classname = $classnameIn;
 		$this->teacher = $teacherIn;
 		$this->period = $periodIn;
 		$this->room = $roomIn;
-		$this->noofstudents = $noofstudentsIn;
 	}
 }
 
@@ -46,15 +39,15 @@ class Booking extends Lesson
 	private $bookedtime = '';
 	private $type = '';
 	
-	function getDate(){return $this->date;}
+	function getDate() : string {return $this->date;}
 	
-	function getBookedTime(){return $this->bookedtime;}
+	function getBookedTime() : string {return $this->bookedtime;}
 	
-	function getType(){return $this->type;}
+	function getType() : string {return $this->type;}
 	
-	function __construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $noofstudentsIn, $dateIn, $bookedByIn, $bookedTimeIn, $typeIn)
+	function __construct(int $idIn, string $classnameIn, string $teacherIn, string $periodIn, string $roomIn, string $dateIn, string $bookedByIn, string $bookedTimeIn, string $typeIn)
 	{
-		parent::__construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $noofstudentsIn);
+		parent::__construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn);
 		$this->date = $dateIn;
 		$this->bookedby = $bookedByIn;
 		$this->bookedtime = $bookedTimeIn;
@@ -66,14 +59,14 @@ class BlockBooking extends Booking
 {
 	private $endDate = '';
 	
-	function setDate($dateIn){$this->date = $dateIn;}
+	function setDate(string $dateIn){$this->date = $dateIn;}
 	
-	function getEndDate(){return $this->endDate;}
-	function setEndDate($dateIn){$this->endDate = $dateIn;}
+	function getEndDate() : string {return $this->endDate;}
+	function setEndDate(string $dateIn){$this->endDate = $dateIn;}
 	
-	function __construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $noofstudentsIn, $dateIn, $bookedByIn, $bookedTimeIn, $typeIn)
+	function __construct(int $idIn, string $classnameIn, string $teacherIn, string $periodIn, string $roomIn, string $dateIn, string $bookedByIn, string $bookedTimeIn, string $typeIn)
 	{
-		parent::__construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $noofstudentsIn, $dateIn, $bookedByIn, $bookedTimeIn, $typeIn);
+		parent::__construct($idIn, $classnameIn, $teacherIn, $periodIn, $roomIn, $dateIn, $bookedByIn, $bookedTimeIn, $typeIn);
 	}
 }
 

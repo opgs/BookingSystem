@@ -11,29 +11,36 @@ ob_start();
 6 - Recurring weekly
 7 - Recurring fortnightly */
 
-function getDisplayNames()
+function getDisplayNames() : array
 {
-	global $SITE, $LDAP;
-	
 	$ous = ['Teachers', 'Technicians', 'Support Staff', 'Admin'];
 	
-	foreach($ous as $ou)
+	$names = [];
+	
+	if(wincache_ucache_exists('bookingtimetableLDAPnames' . htmlspecialchars($_GET['date'])))
 	{
-		$sr = $LDAP->search('OU=' . $ou . ',OU=User Accounts,' . $SITE->ldapDN, '(objectClass=*)', array("displayName"));
-
-		$info = $LDAP->get_entries($sr);
-
-		$names = [];
-		
-		foreach($info as $entry)
+		$names = unserialize(wincache_ucache_get('bookingtimetableLDAPnames' . htmlspecialchars($_GET['date'])));
+	}else{
+		global $SITE, $LDAP;
+	
+		foreach($ous as $ou)
 		{
-			if(isset($entry["displayname"][0]))
+			$sr = $LDAP->search('OU=' . $ou . ',OU=User Accounts,' . $SITE->ldapDN, '(objectClass=*)', array("displayName"));
+
+			$info = $LDAP->get_entries($sr);
+			
+			foreach($info as $entry)
 			{
-				$names[] = $entry["displayname"][0];
+				if(isset($entry["displayname"][0]))
+				{
+					$names[] = $entry["displayname"][0];
+				}
 			}
 		}
+		
+		wincache_ucache_set('bookingtimetableLDAPnames' . htmlspecialchars($_GET['date']), serialize($names));
 	}
-
+	
 	return $names;
 }
 
@@ -54,9 +61,9 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'book')
 		}
 	}
 	
-	$query = 'INSERT INTO dbo.BKLessons (BK_Room, BK_Period, BK_ClassName, BK_Teacher, BK_NoOfStudents, BK_Date, BK_BookedBy, BK_BookedTime, BK_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);';
+	$query = 'INSERT INTO dbo.BKLessons (BK_Room, BK_Period, BK_ClassName, BK_Teacher, BK_NoOfStudents, BK_Date, BK_BookedBy, BK_BookedTime, BK_Type) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?);';
 	
-	$tt = $SQL->query($query, array($_POST['room'], $period, $_POST['lesson'], $_POST['bookedfor'], $_POST['noofstudents'], $_POST['date'], $AD->getUser(), date('d/m/Y H:i'), $type));
+	$tt = $SQL->query($query, array($_POST['room'], $period, $_POST['lesson'], $_POST['bookedfor'], $_POST['date'], $AD->getUser(), date('d/m/Y H:i'), $type));
 	
 	if($tt == false)
 	{
@@ -87,7 +94,7 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'book')
 		$emailcontent += PHP_EOL . 'This has been added as a recurring booking fortnightly';
 	}
 	
-	sendNotice($LDAP->getEmailFromName(htmlspecialchars($_POST['bookedfor'])), htmlspecialchars($_POST['bookedfor']), null, $emailcontent);
+	sendNotice($LDAP->getEmailFromName(htmlspecialchars($_POST['bookedfor'])), htmlspecialchars($_POST['bookedfor']), "Booking Notification", $emailcontent);
 	
 	header('Location: ' . $SITE->path . '/index.php?' . base64_decode($_POST['ret']));
 	exit();
@@ -107,9 +114,9 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'doedit')
 		}
 	}
 
-	$query = 'UPDATE dbo.BKLessons SET BK_ClassName=?, BK_Teacher=?, BK_NoOfStudents=?, BK_BookedBy=?, BK_BookedTime=?, BK_Type=? WHERE BK_ID=?;';
+	$query = 'UPDATE dbo.BKLessons SET BK_ClassName=?, BK_Teacher=?, BK_NoOfStudents=0, BK_BookedBy=?, BK_BookedTime=?, BK_Type=? WHERE BK_ID=?;';
 	
-	$tt = $SQL->query($query, array($_POST['lesson'], $_POST['bookedfor'], $_POST['noofstudents'],  $AD->getUser(), date('d/m/Y H:i'), $type, $_POST['id']));
+	$tt = $SQL->query($query, array($_POST['lesson'], $_POST['bookedfor'], $AD->getUser(), date('d/m/Y H:i'), $type, $_POST['id']));
 	
 	if($tt == false)
 	{
@@ -132,7 +139,7 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'doedit')
 	$emailcontent = str_replace('[EDITOR]', $AD->getUser(), $emailcontent);
 	$emailcontent = str_replace('[REASON]', htmlspecialchars($_POST['reason']), $emailcontent);
 	
-	sendNotice($LDAP->getEmailFromName(htmlspecialchars($_POST['bookedfor'])), htmlspecialchars($_POST['bookedfor']), null, $emailcontent);
+	sendNotice($LDAP->getEmailFromName(htmlspecialchars($_POST['bookedfor'])), htmlspecialchars($_POST['bookedfor']), "Booking Notification", $emailcontent);
 	
 	header('Location: ' . $SITE->path . '/index.php?' . base64_decode($_POST['ret']));
 	exit();
@@ -154,16 +161,22 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'dodelete')
 
 	unset($query, $tt);
 	
-	addLog('Deleted ' . $_POST['lesson'] . ' at ' . $_POST['date'] . ' in ' . $_POST['room'] . ':' . $_POST['time'] . ' for ' . $_POST['bookedfor'], 3);
+	$loglesson = htmlspecialchars($_POST['lesson']);
+	$logdate = htmlspecialchars($_POST['date']);
+	$logroom = htmlspecialchars($_POST['room']);
+	$logtime = htmlspecialchars($_POST['time']);
+	$logoldbookedfor = htmlspecialchars($_POST['oldbookedfor']);
+	
+	addLog('Deleted ' . $loglesson . ' at ' . $logdate . ' in ' . $logroom . ':' . $logtime . ' for ' . $logoldbookedfor, 3);
 	
 	$emailcontent = file_get_contents('email/delete.html');
-	$emailcontent = str_replace('[NAME]', htmlspecialchars($_POST['oldbookedfor']), $emailcontent);
-	$emailcontent = str_replace('[DATE]', htmlspecialchars($_POST['date']), $emailcontent);
-	$emailcontent = str_replace('[ROOM]', htmlspecialchars($_POST['room']), $emailcontent);
+	$emailcontent = str_replace('[NAME]', $logoldbookedfor, $emailcontent);
+	$emailcontent = str_replace('[DATE]', $logdate, $emailcontent);
+	$emailcontent = str_replace('[ROOM]', $logroom, $emailcontent);
 	$emailcontent = str_replace('[EDITOR]', $AD->getUser(), $emailcontent);
 	$emailcontent = str_replace('[REASON]', htmlspecialchars($_POST['reason']), $emailcontent);
 	
-	sendNotice($LDAP->getEmailFromName(htmlspecialchars($_POST['oldbookedfor'])), htmlspecialchars($_POST['oldbookedfor']), null, $emailcontent);
+	sendNotice($LDAP->getEmailFromName($logoldbookedfor), $logoldbookedfor, "Booking Notification", $emailcontent);
 	
 	header('Location: ' . $SITE->path . '/index.php?' . base64_decode($_POST['ret']));
 	exit();
@@ -183,14 +196,14 @@ if(isset($_POST['action']) && htmlspecialchars($_POST['action']) == 'doclose')
 		$emailcontent = str_replace('[EDITOR]', $AD->getUser(), $emailcontent);
 		$emailcontent = str_replace('[REASON]', htmlspecialchars($_POST['reason']), $emailcontent);
 		
-		sendNotice($LDAP->getEmailFromName($booking['BK_Teacher']), $booking['BK_Teacher'], null, $emailcontent);
+		sendNotice($LDAP->getEmailFromName($booking['BK_Teacher']), $booking['BK_Teacher'], "Booking Notification", $emailcontent);
 	}
 	
-	$query = 'INSERT INTO dbo.BKLessons (BK_Room, BK_Period, BK_ClassName, BK_Teacher, BK_NoOfStudents, BK_Date, BK_BookedBy, BK_BookedTime, BK_Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);';
+	$query = 'INSERT INTO dbo.BKLessons (BK_Room, BK_Period, BK_ClassName, BK_Teacher, BK_NoOfStudents, BK_Date, BK_BookedBy, BK_BookedTime, BK_Type) VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?);';
 	
 	for($p = $_POST['closedfrom']; $p <= $_POST['closedto']; $p++)
 	{
-		$tt = $SQL->query($query, array($_POST['room'], $day . $periods[$p], 'Closed<br />' . $_POST['reason'], 'Admin', 0, $_POST['date'], $AD->getUser(), date('d/m/Y H:i'), 4));
+		$tt = $SQL->query($query, array($_POST['room'], $day . $periods[$p], 'Closed<br />' . $_POST['reason'], 'Admin', $_POST['date'], $AD->getUser(), date('d/m/Y H:i'), 4));
 	}
 	
 	if($tt == false)
@@ -225,7 +238,7 @@ if(isset($_GET['action']) && htmlspecialchars($_GET['action']) == 'open')
 		$emailcontent = str_replace('[EDITOR]', $AD->getUser(), $emailcontent);
 		$emailcontent = str_replace('[REASON]', 'Closure has been removed', $emailcontent);
 		
-		sendNotice($LDAP->getEmailFromName($booking['BK_Teacher']), $booking['BK_Teacher'], null, $emailcontent);
+		sendNotice($LDAP->getEmailFromName($booking['BK_Teacher']), $booking['BK_Teacher'], "Booking Notification", $emailcontent);
 	}
 	
 	$query = 'DELETE FROM dbo.BKLessons WHERE BK_Room=? AND BK_Date=? AND BK_Type=?;';
@@ -284,7 +297,7 @@ Booking for - <?php echo $day . ':'; if(isset($_GET['time'])){echo htmlspecialch
 <table>
 <form action="<?php echo htmlspecialchars($SITE->path); ?>/index.php?page=booking&debug=1" method="post">
 <input type="hidden" name="ret" id="ret" value="<?php echo base64_encode('page=home&date=' . $_GET['date']) ?>" />
-<input type="hidden" name="id" id="id" value="<?php echo htmlspecialchars($_GET['id']); ?>" />
+<input type="hidden" name="id" id="id" value="<?php echo (isset($_GET['id']) ? htmlspecialchars($_GET['id']) : ""); ?>" />
 <input type="hidden" name="room" id="room" value="<?php echo htmlspecialchars($_GET['room']); ?>" />
 <input type="hidden" name="date" id="date" value="<?php echo htmlspecialchars($_GET['date']); ?>" />
 <input type="hidden" name="day" id="day" value="<?php echo $day ?>" />
@@ -306,14 +319,12 @@ if(isset($_GET['action']) && htmlspecialchars($_GET['action']) == 'edit' && ($AD
 	$currentBookingResult = $SQL->query($currentBookingQuery, array($_GET['id']));
 	$currentBooking = sqlsrv_fetch_array($currentBookingResult, SQLSRV_FETCH_ASSOC);
 	$currentDescription = $currentBooking['BK_ClassName'];
-	$currentNoOfStudents = $currentBooking['BK_NoOfStudents'];
 	$currentTeacher = $currentBooking['BK_Teacher'];
 	$currentType = $currentBooking['BK_Type'];
 }
 ?>
 <?php if(!$AD->isAdmin()){echo '<input type="hidden" name="bookedfor" id="bookedfor" value="'. $AD->getUser() .'"/>';} ?>
 <tr><td>Lesson Description</td><td><input type="text" name="lesson" id="lesson" value="<?php echo $currentDescription; ?>"/></td></tr>
-<tr><td>No. of Students (32 max)</td><td><input type="text" name="noofstudents" id="noofstudents" value="<?php echo $currentNoOfStudents; ?>"/></td></tr>
 <tr><td>Booked for</td><td><input type="text" name="bookedfor" autocomplete="off" id="bookedfor" value="<?php echo $currentTeacher; ?>" <?php if(!$AD->isAdmin()){echo "disabled='disabled'";}?>/></td></tr>
 <?php if(isset($_GET['action']) && htmlspecialchars($_GET['action']) == 'close' && $AD->isAdmin()){ ?>
 <tr><td>Close from</td>
@@ -395,7 +406,7 @@ if(isset($_GET['action']) && htmlspecialchars($_GET['action']) == 'edit' && ($AD
 <tr><td colspan="2"><input type="submit" value="Delete" /></td></tr>
 </form>
 <?php } ?>
-<form action="<?php echo htmlspecialchars($SITE->path); ?>/index.php?page=home" method="post">
+<form action="<?php echo htmlspecialchars($SITE->path); ?>/index.php?page=home&date=<?php echo htmlspecialchars($_GET['date']); ?>" method="post">
 <tr><td colspan="2"><input type="submit" value="Cancel" /></td></tr>
 </form>
 </table>

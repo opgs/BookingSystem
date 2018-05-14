@@ -47,12 +47,26 @@ OPGS Booking v10 20/10/2016 L Bridges
 OPGS Booking v11 24/10/2016	L Bridges
 	- Updates ADFS and LDAP libs to be independent
 	- Moved data.php and records.php out of lib folder
+OPGS Booking v12 08/01/2018 L Bridges
+	- PHP7 types added
+OPGS Booking v13 26/01/2018 L Bridges
+	- Fixed $_GET['page'] bug in sys/data.php and improved $_GET['date'] detection
+	- Fixed week 1/2 lookup for weekends causing index not found error
+OPGS Booking v14 10/04/2018 L Bridges
+	- Edited data logic in sys/data.php to reduce ops
+	- Removing no of students feature as was unused
+	- Updated to jquery 3.3.1
+	- Updated jquery ui to 1.12.1
+OPGS Booking v15 04/2018 L Bridges
+	- Added mobile accordion view for devices < 750px width
+	- Re-factored getCell removing globals, passing by ref and reusing common code and strings
 */
-
 
 header("X-UA-Compatible: IE=edge");
 
 $SITE = new stdClass();
+
+$mobile = (isset($_GET['m']));
 
 session_start();
 
@@ -60,7 +74,7 @@ ob_start();
 
 require('d:\dev\opgslib\opgslib.php');
 
-$SETTINGS = new INI('settings.ini', 'bookingsettingsdat');
+$SETTINGS = new INI('settings.ini', 'bookingsettingsdat2');
 $SETTINGS->getSection('site', $SITE);
 $SETTINGS->getSection('yearblocks', $SITE->yearblocks);
 
